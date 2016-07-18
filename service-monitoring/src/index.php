@@ -378,4 +378,3 @@ $template->assign('preferences', $preferences);
 $template->assign('data', $data);
 $template->assign('broker', "broker");
 $template->display('table.ihtml');
-?>
