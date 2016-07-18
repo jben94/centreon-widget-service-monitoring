@@ -120,14 +120,18 @@ $template->assign("widgetId", $_POST['widgetId']);
 $template->display('toolbar.ihtml');
 
 ?>
-<link href="../../include/common/javascript/jquery/plugins/colorbox/colorbox.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="../../include/common/javascript/jquery/plugins/colorbox/jquery.colorbox-min.js"></script>
+<!--<link href="../../include/common/javascript/jquery/plugins/colorbox/colorbox.css" rel="stylesheet" type="text/css"/>-->
+<!--<script type="text/javascript" src="../../include/common/javascript/jquery/plugins/colorbox/jquery.colorbox-min.js"></script>-->
+<script type="text/javascript" src="../../include/common/javascript/centreon/popin.js"></script>
 <script type='text/javascript'>
 var tab = new Array();
 var actions = "<?php echo $actions;?>";
+var widget_id = "<?php echo $widgetId; ?>";
+var sid = '<?php echo session_id();?>';
 
 $(function() {
 	$(".toolbar").html(actions);
+
 	$(".toolbar").change(function() {
 		if (jQuery(this).val() != 0) {
     		var checkValues = $("input:checked").map(function() {
@@ -135,14 +139,18 @@ $(function() {
     			return tmp[1];
     		}).get().join(",");
             if (checkValues != '') {
-                parent.jQuery.colorbox({
-                                    href		:	"./widgets/service-monitoring/src/action.php?selection="+checkValues+"&cmd="+jQuery(this).val(),
-                                    width		:	"50%",
-                                    height		:	"40%",
-                                    opacity		:	0.7,
-                                    overlayClose:	false,
-                                    iframe		: 	true
-                                });
+//                parent.jQuery.colorbox({
+//                                    href		:	"./widgets/service-monitoring/src/action.php?selection="+checkValues+"&cmd="+jQuery(this).val(),
+//                                    width		:	"50%",
+//                                    height		:	"40%",
+//                                    opacity		:	0.7,
+//                                    overlayClose:	false,
+//                                    iframe		: 	true
+//                                });
+                var url = "./widgets/service-monitoring/src/action.php?widgetId="+widgetId+"&sid="+sid+"&selection="+checkValues+"&cmd="+jQuery(this).val();
+                parent.jQuery('#WidgetService').parent().remove();
+                var popin = parent.jQuery('<div id="WidgetService">');
+                popin.centreonPopin({open:true,url:url});
             } else {
                 alert("<?php echo _('Please select one or more items'); ?>"); 
                 return false;

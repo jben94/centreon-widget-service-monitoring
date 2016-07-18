@@ -121,7 +121,7 @@ $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		h.action_url as h_action_url,
 		h.notes_url as h_notes_url,
 		s.action_url as s_action_url,
-		s.notes_url as s_notes_url, 
+		s.notes_url as s_notes_url,
 		cv2.value AS criticality_id,
 		cv.value AS criticality_level,
         h.icon_image
@@ -209,7 +209,7 @@ if (isset($preferences['state_type_filter']) && $preferences['state_type_filter'
 }
 
 if (isset($preferences['hostgroup']) && $preferences['hostgroup']) {
-    $query = CentreonUtils::conditionBuilder($query, 
+    $query = CentreonUtils::conditionBuilder($query,
     " s.host_id IN (
       SELECT host_host_id
       FROM ".$conf_centreon['db'].".hostgroup_relation
@@ -220,7 +220,7 @@ if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
     sgm ON sg.servicegroup_id = sgm.servicegroup_id INNER JOIN services s ON s.service_id = sgm.service_id
     INNER JOIN  hosts h ON sgm.host_id = h.host_id AND h.host_id = s.host_id WHERE  sg.servicegroup_id =
     ".$dbb->escape($preferences['servicegroup']);
-    
+
     $resultHost = $dbb->query($queryHost);
     if (PEAR::isError($resultHost)) {
         print "DB Error : " . $resultHost->getDebugInfo() . "<br />";
@@ -229,17 +229,17 @@ if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
     while ($row = $resultHost->fetchRow()) {
         $Host[] = $row['host_id'];
     }
-    
-    $query = CentreonUtils::conditionBuilder($query, 
+
+    $query = CentreonUtils::conditionBuilder($query,
       " s.service_id IN (
-            SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm, 
-            services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id 
+            SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm,
+            services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id
             AND sg.servicegroup_id = sgm.servicegroup_id
-            AND sg.servicegroup_id = ".$dbb->escape($preferences['servicegroup'])." 
-            AND h.host_id IN (".  implode(",", $Host).") 
+            AND sg.servicegroup_id = ".$dbb->escape($preferences['servicegroup'])."
+            AND h.host_id IN (".  implode(",", $Host).")
       ) ");
 }
-if (isset($preferences["display_severities"]) && $preferences["display_severities"] 
+if (isset($preferences["display_severities"]) && $preferences["display_severities"]
     && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
   $tab = split(",", $preferences['criticality_filter']);
   $labels = "";
@@ -258,7 +258,7 @@ if (isset($preferences["display_severities"]) && $preferences["display_severitie
     }
     $idC .= $d1['sc_id'];
   }
-  $query .= " AND cv2.`value` IN ($idC) "; 
+  $query .= " AND cv2.`value` IN ($idC) ";
 }
 if (!$centreon->user->admin) {
     $pearDB = $db;
@@ -281,7 +281,7 @@ if (isset($preferences['output_search']) && $preferences['output_search'] != "")
 $orderby = "hostname ASC , description ASC";
 
 if (isset($preferences['order_by']) && $preferences['order_by'] != "") {
-    
+
     $aOrder = explode(" ", $preferences['order_by']);
     if (in_array('last_state_change', $aOrder) || in_array('last_hard_state_change', $aOrder)) {
         if ($aOrder[1] == 'DESC') {
@@ -341,7 +341,7 @@ while ($row = $res->fetchRow()) {
             $value = CentreonUtils::escapeSecure($svcObj->replaceMacroInString($row['service_id'], $value));
         } elseif ($key == "criticality_id" && $value != '') {
             $critData = $criticality->getData($row["criticality_id"], 1);
-            $value = "<img src='../../img/media/".$media->getFilename($critData['icon_id'])."' title='".$critData["sc_name"]."' width='16' height='16'>";        
+            $value = "<img src='../../img/media/".$media->getFilename($critData['icon_id'])."' title='".$critData["sc_name"]."' width='16' height='16'>";
         }
         $data[$row['host_id']."_".$row['service_id']][$key] = $value;
     }
