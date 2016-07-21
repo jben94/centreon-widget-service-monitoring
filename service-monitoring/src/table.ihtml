@@ -4,7 +4,7 @@
 	@import url('../../Themes/Centreon-2/Color/blue_css.php');
 	</style>
 {/literal}
-    <div id="serviceMonitoringTable" style ="float:left; width:100%;">
+    <div id="serviceMonitoringTable">
     <table id='HostTable' class='ListTable styleTable'>
 	<tr class="ListHeader">
             {if $preferences.more_views}<td class="ListColHeaderPicker"><input type='checkbox' id='selection_0;0' class='checkall selection'/></td>{/if}
