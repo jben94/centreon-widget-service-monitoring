@@ -229,15 +229,17 @@ if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
     while ($row = $resultHost->fetchRow()) {
         $Host[] = $row['host_id'];
     }
-    
-    $query = CentreonUtils::conditionBuilder($query, 
-      " s.service_id IN (
-            SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm, 
-            services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id 
+
+    if(count($Host) === 0){
+        $query = CentreonUtils::conditionBuilder($query,
+            " s.service_id IN (
+            SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm,
+            services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id
             AND sg.servicegroup_id = sgm.servicegroup_id
-            AND sg.servicegroup_id = ".$dbb->escape($preferences['servicegroup'])." 
-            AND h.host_id IN (".  implode(",", $Host).") 
+            AND sg.servicegroup_id = ".$dbb->escape($preferences['servicegroup'])."
+            AND h.host_id IN (".  implode(",", $Host).")
       ) ");
+    }
 }
 if (isset($preferences["display_severities"]) && $preferences["display_severities"] 
     && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
