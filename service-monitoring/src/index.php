@@ -136,8 +136,55 @@ $query .= " WHERE s.host_id = h.host_id ";
 $query .= " AND h.name NOT LIKE '_Module_%' ";
 $query .= " AND s.enabled = 1 ";
 $query .= " AND h.enabled = 1 ";
+
+
+
+if (isset($preferences["display_severities"]) && $preferences["display_severities"]
+    && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
+    $tab = explode(",", $preferences['criticality_filter']);
+    $labels = "";
+    foreach ($tab as $p) {
+        if ($labels != '') {
+            $labels .= ',';
+        }
+        $labels .= "'".trim($p)."'";
+    }
+    $query2 = "SELECT sc_id FROM service_categories WHERE sc_name IN (".$labels.")";
+    $RES = $db->query($query2);
+    $idC = "";
+    while ($d1 = $RES->fetchRow()) {
+        if ($idC != '') {
+            $idC .= ",";
+        }
+        $idC .= $d1['sc_id'];
+    }
+    $query .= " AND cv2.`value` IN ($idC) ";
+}
+if (!$centreon->user->admin) {
+    $pearDB = $db;
+    $aclObj = new CentreonACL($centreon->user->user_id, $centreon->user->admin);
+    $groupList = $aclObj->getAccessGroupsString();
+    $query .= " AND h.host_id = acl.host_id
+	AND acl.service_id = s.service_id
+	AND acl.group_id IN ($groupList)";
+}
+if (isset($preferences['output_search']) && $preferences['output_search'] != "") {
+    $tab = explode(" ", $preferences['output_search']);
+    $op = $tab[0];
+    if (isset($tab[1])) {
+        $search = $tab[1];
+    }
+    if ($op && isset($search) && $search != "") {
+        $query = CentreonUtils::conditionBuilder($query, "s.output ".CentreonUtils::operandToMysqlFormat($op)." '".$dbb->escape($search)."' ");
+    }
+}
+
+        ///////////////////////////
+        // HOST NAME COMPARAISON //
+        ///////////////////////////
+
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
-    $tab = split(" ", $preferences['host_name_search']);
+    $tab = explode(" ", $preferences['host_name_search']);
     $op = $tab[0];
     if (isset($tab[1])) {
         $search = $tab[1];
@@ -146,8 +193,13 @@ if (isset($preferences['host_name_search']) && $preferences['host_name_search'] 
         $query = CentreonUtils::conditionBuilder($query, "h.name ".CentreonUtils::operandToMysqlFormat($op)." '".$dbb->escape($search)."' ");
     }
 }
+
+        //////////////////////////////
+        // SERVICE NAME COMPARAISON //
+        //////////////////////////////
+
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
-    $tab = split(" ", $preferences['service_description_search']);
+    $tab = explode(" ", $preferences['service_description_search']);
     $op = $tab[0];
     if (isset($tab[1])) {
         $search = $tab[1];
@@ -200,6 +252,11 @@ if (isset($preferences['downtime_filter']) && $preferences['downtime_filter']) {
     }
 }
 
+if (isset($preferences['poller_filter']) && $preferences['poller_filter']) {
+
+            $query = CentreonUtils::conditionBuilder($query, " instance_id = ".$preferences['poller_filter']." ");
+    }
+
 if (isset($preferences['state_type_filter']) && $preferences['state_type_filter']) {
     if ($preferences['state_type_filter'] == "hardonly") {
         $query = CentreonUtils::conditionBuilder($query, " s.state_type = 1 ");
@@ -243,7 +300,7 @@ if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
 }
 if (isset($preferences["display_severities"]) && $preferences["display_severities"] 
     && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
-  $tab = split(",", $preferences['criticality_filter']);
+  $tab = explode(",", $preferences['criticality_filter']);
   $labels = "";
   foreach ($tab as $p) {
     if ($labels != '') {
@@ -260,7 +317,7 @@ if (isset($preferences["display_severities"]) && $preferences["display_severitie
     }
     $idC .= $d1['sc_id'];
   }
-  $query .= " AND cv2.`value` IN ($idC) "; 
+  $query .= " AND cv2.`value` IN ($idC) ";
 }
 if (!$centreon->user->admin) {
     $pearDB = $db;
@@ -271,7 +328,7 @@ if (!$centreon->user->admin) {
 	AND acl.group_id IN ($groupList)";
 }
 if (isset($preferences['output_search']) && $preferences['output_search'] != "") {
-    $tab = split(" ", $preferences['output_search']);
+    $tab = explode(" ", $preferences['output_search']);
     $op = $tab[0];
     if (isset($tab[1])) {
         $search = $tab[1];
@@ -380,4 +437,3 @@ $template->assign('preferences', $preferences);
 $template->assign('data', $data);
 $template->assign('broker', "broker");
 $template->display('table.ihtml');
-?>

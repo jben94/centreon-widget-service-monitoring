@@ -10,7 +10,7 @@ function loadPage()
     jQuery.ajax("./src/index.php?widgetId=" + widgetId + "&page=" + pageNumber, {
         success: function (htmlData) {
             jQuery("#serviceMonitoringTable").empty().append(htmlData);
-            var hostMonitoringTable = jQuery("#serviceMonitoringTable").find("img, style, script, link").load(function () {
+            var serviceMonitoringTable = jQuery("#serviceMonitoringTable").find("img, style, script, link").load(function () {
                 var h = document.getElementById("serviceMonitoringTable").scrollHeight + 50;
                 ResizeFrame(window.name, h);
             });
@@ -56,6 +56,5 @@ function ResizeFrame(ifrm, height) {
     if (height < 150) {
         height = 150;
     }
-    console.log(jQuery('[name="' + ifrm + '"]'));
     jQuery(window.parent.document).find('[name="' + ifrm + '"]').height(height);
 }

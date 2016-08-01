@@ -155,7 +155,7 @@ $query .= " WHERE s.host_id = h.host_id ";
 $query .= " AND h.name NOT LIKE '_Module_%' ";
 $query .= " AND s.enabled = 1 ";
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
-    $tab = split(" ", $preferences['host_name_search']);
+    $tab = explode(" ", $preferences['host_name_search']);
     $op = $tab[0];
     if (isset($tab[1])) {
         $search = $tab[1];
@@ -165,7 +165,7 @@ if (isset($preferences['host_name_search']) && $preferences['host_name_search'] 
     }
 }
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
-    $tab = split(" ", $preferences['service_description_search']);
+    $tab = explode(" ", $preferences['service_description_search']);
     $op = $tab[0];
     if (isset($tab[1])) {
         $search = $tab[1];
@@ -210,6 +210,10 @@ if (isset($preferences['downtime_filter']) && $preferences['downtime_filter']) {
         $query = CentreonUtils::conditionBuilder($query, " s.scheduled_downtime_depth = 0 ");
     }
 }
+
+if (isset($preferences['poller_filter']) && $preferences['poller_filter']) {
+        $query = CentreonUtils::conditionBuilder($query, " instance_id = " . $preferences['poller_filter'] . " ");
+    }
 
 if (isset($preferences['state_type_filter']) && $preferences['state_type_filter']) {
     if ($preferences['state_type_filter'] == "hardonly") {

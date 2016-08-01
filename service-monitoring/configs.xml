@@ -4,15 +4,15 @@
   <email>contact@centreon.com</email>
   <website>http://www.centreon.com</website>
   <description>Widget for displaying service monitoring information</description>
-  <version>1.4.2</version>
+  <version>1.4.3</version>
   <keywords>centreon, widget, service, monitoring</keywords>
   <screenshot></screenshot>
   <thumbnail>./widgets/service-monitoring/resources/centreon-logo.png</thumbnail>
   <url>./widgets/service-monitoring/index.php</url>
   <autoRefresh>10</autoRefresh>
   <preferences>
-    <preference label="Host Name" name="host_name_search" defaultValue="" type="compare" header="Filters"/>
-    <preference label="Service Description" name="service_description_search" defaultValue="" type="compare"/>
+    <preference label="Host Name (multiple choices separated by ',')" name="host_name_search" defaultValue="" type="compare" header="Filters"/>
+    <preference label="Service Description (multiple choices separated by ',')" name="service_description_search" defaultValue="" type="compare"/>
     <preference label="Display Ok" name="svc_ok" defaultValue="1" type="boolean"/>
     <preference label="hide services with DOWN host" name="hide_down_host" defaultValue="0" type="boolean"/>
     <preference label="Display Warning" name="svc_warning" defaultValue="1" type="boolean"/>
@@ -28,6 +28,7 @@
       <option value="downtime" label="In downtime"/>
       <option value="ndowntime" label="Not in downtime"/>
     </preference>
+    <preference label="Pollers Name Filter" name="poller_filter" type="poller"/>
     <preference label="State Type" name="state_type_filter" type="list">
       <option value="hardonly" label="Hard Only"/>
       <option value="softonly" label="Soft Only"/>
