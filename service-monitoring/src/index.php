@@ -137,11 +137,12 @@ $query .= " AND h.name NOT LIKE '_Module_%' ";
 $query .= " AND s.enabled = 1 ";
 $query .= " AND h.enabled = 1 ";
 
+        ///////////////////////////
+        // HOST NAME COMPARAISON //
+        ///////////////////////////
 
-
-if (isset($preferences["display_severities"]) && $preferences["display_severities"]
-    && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
-    $tab = explode(",", $preferences['criticality_filter']);
+if (isset($preferences['display_host_name']) && $preferences['display_host_name'] != "") {
+    $tab = explode(",", $preferences['display_host_name']);
     $labels = "";
     foreach ($tab as $p) {
         if ($labels != '') {
@@ -149,17 +150,20 @@ if (isset($preferences["display_severities"]) && $preferences["display_severitie
         }
         $labels .= "'".trim($p)."'";
     }
-    $query2 = "SELECT sc_id FROM service_categories WHERE sc_name IN (".$labels.")";
+    $query2 = "SELECT hc_id FROM hostcategories WHERE hc_name IN (".$labels.")";
     $RES = $db->query($query2);
     $idC = "";
     while ($d1 = $RES->fetchRow()) {
         if ($idC != '') {
             $idC .= ",";
         }
-        $idC .= $d1['sc_id'];
+        $idC .= $d1['hc_id'];
+    } var_dump($idC);
+    if ($idC != ""){
+        $query .= " AND cv2.`value` IN ($idC) ";
     }
-    $query .= " AND cv2.`value` IN ($idC) ";
 }
+
 if (!$centreon->user->admin) {
     $pearDB = $db;
     $aclObj = new CentreonACL($centreon->user->user_id, $centreon->user->admin);
@@ -168,20 +172,6 @@ if (!$centreon->user->admin) {
 	AND acl.service_id = s.service_id
 	AND acl.group_id IN ($groupList)";
 }
-if (isset($preferences['output_search']) && $preferences['output_search'] != "") {
-    $tab = explode(" ", $preferences['output_search']);
-    $op = $tab[0];
-    if (isset($tab[1])) {
-        $search = $tab[1];
-    }
-    if ($op && isset($search) && $search != "") {
-        $query = CentreonUtils::conditionBuilder($query, "s.output ".CentreonUtils::operandToMysqlFormat($op)." '".$dbb->escape($search)."' ");
-    }
-}
-
-        ///////////////////////////
-        // HOST NAME COMPARAISON //
-        ///////////////////////////
 
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
     $tab = explode(" ", $preferences['host_name_search']);

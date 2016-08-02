@@ -4,14 +4,14 @@
   <email>contact@centreon.com</email>
   <website>http://www.centreon.com</website>
   <description>Widget for displaying service monitoring information</description>
-  <version>1.4.3</version>
+  <version>1.4.2</version>
   <keywords>centreon, widget, service, monitoring</keywords>
   <screenshot></screenshot>
   <thumbnail>./widgets/service-monitoring/resources/centreon-logo.png</thumbnail>
   <url>./widgets/service-monitoring/index.php</url>
   <autoRefresh>10</autoRefresh>
   <preferences>
-    <preference label="Host Name (multiple choices separated by ',')" name="host_name_search" defaultValue="" type="compare" header="Filters"/>
+    <!--<preference label="Host Name (multiple choices separated by ',')" name="host_name_search" defaultValue="" type="compare" header="Filters"/>-->
     <preference label="Service Description (multiple choices separated by ',')" name="service_description_search" defaultValue="" type="compare"/>
     <preference label="Display Ok" name="svc_ok" defaultValue="1" type="boolean"/>
     <preference label="hide services with DOWN host" name="hide_down_host" defaultValue="0" type="boolean"/>
@@ -37,8 +37,8 @@
     <preference label="Servicegroup" name="servicegroup" defaultValue="" type="servicegroup"/>
     <preference label="Results" name="entries" defaultValue="50" type="range" min="10" max="100" step="10"/>
     <preference label="Output" name="output_search" defaultValue="" type="compare" />
-    <preference label="Display Severities" name="display_severities" defaultValue="1" type="boolean" header="Columns"/>
-    <preference label="Display Host Name" name="display_host_name" defaultValue="1" type="boolean" />
+    <!--<preference label="Display Severities" name="display_severities" defaultValue="1" type="boolean" header="Columns"/>-->
+    <!--<preference label="Display Host Name" name="display_host_name" defaultValue="1" type="boolean" />-->
     <preference label="Display Service Description" name="display_svc_description" defaultValue="1" type="boolean"/>
     <preference label="Display Output" name="display_output" defaultValue="1" type="boolean"/>
     <preference label="Output Length" name="output_length" defaultValue="50" type="range" min="50" max="500" step="50"/>
