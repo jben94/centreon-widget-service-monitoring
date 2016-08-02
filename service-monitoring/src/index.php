@@ -140,9 +140,12 @@ $query .= " AND h.enabled = 1 ";
         ///////////////////////////
         // HOST NAME COMPARAISON //
         ///////////////////////////
-
-if (isset($preferences['display_host_name']) && $preferences['display_host_name'] != "") {
-    $tab = explode(",", $preferences['display_host_name']);
+//    echo "<pre>";
+//    var_dump($preferences);
+//    echo "</pre>";
+if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != ""){
+    var_dump($preferences['host_name_search']);
+    $tab = explode(",", $preferences['host_name_search']);
     $labels = "";
     foreach ($tab as $p) {
         if ($labels != '') {
@@ -150,15 +153,16 @@ if (isset($preferences['display_host_name']) && $preferences['display_host_name'
         }
         $labels .= "'".trim($p)."'";
     }
-    $query2 = "SELECT hc_id FROM hostcategories WHERE hc_name IN (".$labels.")";
+    $query2 = "SELECT host_id FROM host WHERE host_name IN (".$labels.")";
+    var_dump($query2);
     $RES = $db->query($query2);
     $idC = "";
     while ($d1 = $RES->fetchRow()) {
         if ($idC != '') {
             $idC .= ",";
         }
-        $idC .= $d1['hc_id'];
-    } var_dump($idC);
+        $idC .= $d1['host_id'];
+    }
     if ($idC != ""){
         $query .= " AND cv2.`value` IN ($idC) ";
     }
