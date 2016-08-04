@@ -137,46 +137,6 @@ $query .= " AND h.name NOT LIKE '_Module_%' ";
 $query .= " AND s.enabled = 1 ";
 $query .= " AND h.enabled = 1 ";
 
-        ///////////////////////////
-        // HOST NAME COMPARAISON //
-        ///////////////////////////
-//    echo "<pre>";
-//    var_dump($preferences);
-//    echo "</pre>";
-if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != ""){
-    var_dump($preferences['host_name_search']);
-    $tab = explode(",", $preferences['host_name_search']);
-    $labels = "";
-    foreach ($tab as $p) {
-        if ($labels != '') {
-            $labels .= ',';
-        }
-        $labels .= "'".trim($p)."'";
-    }
-    $query2 = "SELECT host_id FROM host WHERE host_name IN (".$labels.")";
-    var_dump($query2);
-    $RES = $db->query($query2);
-    $idC = "";
-    while ($d1 = $RES->fetchRow()) {
-        if ($idC != '') {
-            $idC .= ",";
-        }
-        $idC .= $d1['host_id'];
-    }
-    if ($idC != ""){
-        $query .= " AND cv2.`value` IN ($idC) ";
-    }
-}
-
-if (!$centreon->user->admin) {
-    $pearDB = $db;
-    $aclObj = new CentreonACL($centreon->user->user_id, $centreon->user->admin);
-    $groupList = $aclObj->getAccessGroupsString();
-    $query .= " AND h.host_id = acl.host_id
-	AND acl.service_id = s.service_id
-	AND acl.group_id IN ($groupList)";
-}
-
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
     $tab = explode(" ", $preferences['host_name_search']);
     $op = $tab[0];
@@ -187,11 +147,6 @@ if (isset($preferences['host_name_search']) && $preferences['host_name_search'] 
         $query = CentreonUtils::conditionBuilder($query, "h.name ".CentreonUtils::operandToMysqlFormat($op)." '".$dbb->escape($search)."' ");
     }
 }
-
-        //////////////////////////////
-        // SERVICE NAME COMPARAISON //
-        //////////////////////////////
-
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
     $tab = explode(" ", $preferences['service_description_search']);
     $op = $tab[0];
@@ -202,6 +157,7 @@ if (isset($preferences['service_description_search']) && $preferences['service_d
         $query = CentreonUtils::conditionBuilder($query, "s.description ".CentreonUtils::operandToMysqlFormat($op)." '".$dbb->escape($search)."' ");
     }
 }
+
 $stateTab = array();
 if (isset($preferences['svc_ok']) && $preferences['svc_ok']) {
     $stateTab[] = 0;
@@ -219,12 +175,9 @@ if (isset($preferences['svc_pending']) && $preferences['svc_pending']) {
     $stateTab[] = 4;
 }
 
-
 if (isset($preferences['hide_down_host']) && $preferences['hide_down_host']) {
     $query = CentreonUtils::conditionBuilder($query, " h.state != 1 ");
 }
-
-
 
 if (count($stateTab)) {
     $query = CentreonUtils::conditionBuilder($query, " s.state IN (" . implode(',', $stateTab) . ")");
