@@ -4,14 +4,14 @@
   <email>contact@centreon.com</email>
   <website>http://www.centreon.com</website>
   <description>Widget for displaying service monitoring information</description>
-  <version>1.4.5</version>
+  <version>1.4.6</version>
   <keywords>centreon, widget, service, monitoring</keywords>
   <screenshot></screenshot>
   <thumbnail>./widgets/service-monitoring/resources/centreon-logo.png</thumbnail>
   <url>./widgets/service-monitoring/index.php</url>
   <autoRefresh>10</autoRefresh>
   <preferences>
-    <preference label="Host Name (multiple hosts separated by '|' with no spaces)" name="host_name_search" defaultValue="" type="compare" header="Filters"/>
+    <preference label="Host Filter" name="host_name_search" defaultValue="" type="hostMulti"/>
     <preference label="Service Description (multiple services separated by '|' with no spaces)" name="service_description_search" defaultValue="" type="compare"/>
     <preference label="Display Ok" name="svc_ok" defaultValue="1" type="boolean"/>
     <preference label="hide services with DOWN host" name="hide_down_host" defaultValue="0" type="boolean"/>
@@ -64,6 +64,6 @@
       <option value="last_hard_state_change" label="Hard State Duration"/>
     </preference>
     <preference label="Refresh Interval (seconds)" name="refresh_interval" defaultValue="30" type="text" header="Misc"/>
-    <preference label="Enable pagination and more actions" name="more_views" defaultValue="0" type="boolean"/>		
+    <preference label="Enable pagination and more actions" name="more_views" defaultValue="0" type="boolean"/>
   </preferences>        
 </configs>
