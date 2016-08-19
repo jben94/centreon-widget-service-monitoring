@@ -4,7 +4,7 @@
   <email>contact@centreon.com</email>
   <website>http://www.centreon.com</website>
   <description>Widget for displaying service monitoring information</description>
-  <version>1.4.6</version>
+  <version>1.4.7</version>
   <keywords>centreon, widget, service, monitoring</keywords>
   <screenshot></screenshot>
   <thumbnail>./widgets/service-monitoring/resources/centreon-logo.png</thumbnail>
@@ -12,7 +12,7 @@
   <autoRefresh>10</autoRefresh>
   <preferences>
     <preference label="Host Filter" name="host_name_search" defaultValue="" type="hostMulti"/>
-    <preference label="Service Description (multiple services separated by '|' with no spaces)" name="service_description_search" defaultValue="" type="compare"/>
+    <preference label="Service Filter" name="service_description_search" defaultValue="" type="serviceMulti"/>
     <preference label="Display Ok" name="svc_ok" defaultValue="1" type="boolean"/>
     <preference label="hide services with DOWN host" name="hide_down_host" defaultValue="0" type="boolean"/>
     <preference label="Display Warning" name="svc_warning" defaultValue="1" type="boolean"/>

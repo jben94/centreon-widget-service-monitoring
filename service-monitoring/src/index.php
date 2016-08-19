@@ -142,14 +142,9 @@ if (isset($preferences['host_name_search']) && $preferences['host_name_search'] 
 }
 
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
-    $tab = explode(" ", $preferences['service_description_search']);
-    $op = $tab[0];
-    if (isset($tab[1])) {
-        $search = $tab[1];
-    }
-    if ($op && isset($search) && $search != "") {
-        $query = CentreonUtils::conditionBuilder($query, "s.description ".CentreonUtils::operandToMysqlFormat($op)." '".$dbb->escape($search)."' ");
-    }
+    preg_match_all("/(\\d+)\\-(\\d+),?/", $preferences['service_description_search'], $matches);
+    $svcListId = implode(',', $matches[2]);
+    $query .= " AND s.service_id IN ($svcListId)";
 }
 
 $stateTab = array();
