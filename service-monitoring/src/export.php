@@ -163,6 +163,11 @@ if (isset($preferences['service_description_search']) && $preferences['service_d
     $svcListId = implode(',', $matches[2]);
     $query .= " AND s.service_id IN ($svcListId)";
 }
+
+if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] !=""){
+    $query .= " AND hc.hc_id IN ($preferences[host_categories_search])";
+}
+
 $stateTab = array();
 if (isset($preferences['svc_ok']) && $preferences['svc_ok']) {
     $stateTab[] = 0;

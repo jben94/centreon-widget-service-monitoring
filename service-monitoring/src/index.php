@@ -147,6 +147,17 @@ if (isset($preferences['service_description_search']) && $preferences['service_d
     $query .= " AND s.service_id IN ($svcListId)";
 }
 
+
+
+/// HOST CATEGORIES ///
+if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] !=""){
+    $query .= " AND hc.hc_id IN ($preferences[host_categories_search])";
+}
+
+
+
+
+
 $stateTab = array();
 if (isset($preferences['svc_ok']) && $preferences['svc_ok']) {
     $stateTab[] = 0;
