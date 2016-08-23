@@ -118,6 +118,8 @@ $stateLabels = array(0 => "Ok",
 $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		h.name as hostname,
 		h.state as h_state,
+		hc.hc_id,
+		hc.hc_name,
 		s.service_id,
 		s.description,
 		s.state as s_state,
@@ -145,9 +147,10 @@ $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		cv2.value AS criticality_id,
 		cv.value AS criticality_level
 ";
-$query .= " FROM hosts h, services s ";
+$query .= " FROM hosts h, services s, hostcategories hc ";
 $query .= " LEFT JOIN customvariables cv ON (s.service_id = cv.service_id AND s.host_id = cv.host_id AND cv.name = 'CRITICALITY_LEVEL') ";
 $query .= " LEFT JOIN customvariables cv2 ON (s.service_id = cv2.service_id AND s.host_id = cv2.host_id AND cv2.name = 'CRITICALITY_ID') ";
+
 if (!$centreon->user->admin) {
     $query .= " , centreon_acl acl ";
 }

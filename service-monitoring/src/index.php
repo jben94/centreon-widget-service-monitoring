@@ -126,9 +126,13 @@ $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		cv.value AS criticality_level,
         h.icon_image
 ";
-$query .= " FROM hosts h, services s ";
+$query .= " FROM hosts h ";
+$query .= " LEFT JOIN instances i ON h.instance_id = i.instance_id, services s ";
 $query .= " LEFT JOIN customvariables cv ON (s.service_id = cv.service_id AND s.host_id = cv.host_id AND cv.name = 'CRITICALITY_LEVEL') ";
 $query .= " LEFT JOIN customvariables cv2 ON (s.service_id = cv2.service_id AND s.host_id = cv2.host_id AND cv2.name = 'CRITICALITY_ID') ";
+if (isset($preferences['host_categories_search'])) {
+    $query .= " LEFT JOIN centreon.hostcategories_relation hcr ON (s.host_id = hcr.host_host_id) ";
+}
 if (!$centreon->user->admin) {
     $query .= " , centreon_acl acl ";
 }
@@ -147,16 +151,9 @@ if (isset($preferences['service_description_search']) && $preferences['service_d
     $query .= " AND s.service_id IN ($svcListId)";
 }
 
-
-
-/// HOST CATEGORIES ///
-if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] !=""){
-    $query .= " AND hc.hc_id IN ($preferences[host_categories_search])";
+if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] != ""){
+    $query .= " AND hcr.hostcategories_hc_id IN ($preferences[host_categories_search])";
 }
-
-
-
-
 
 $stateTab = array();
 if (isset($preferences['svc_ok']) && $preferences['svc_ok']) {
