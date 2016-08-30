@@ -133,6 +133,9 @@ $query .= " LEFT JOIN customvariables cv2 ON (s.service_id = cv2.service_id AND 
 if (isset($preferences['host_categories_search'])) {
     $query .= " LEFT JOIN centreon.hostcategories_relation hcr ON (s.host_id = hcr.host_host_id) ";
 }
+//if (isset($preferences['metric_search'])) {
+//    $query .= " LEFT JOIN centreon.metrics m ON (s.service_id= m.metric_id) ";
+//}
 if (!$centreon->user->admin) {
     $query .= " , centreon_acl acl ";
 }
@@ -143,6 +146,10 @@ $query .= " AND h.enabled = 1 ";
 
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
     $query .= " AND h.host_id IN ($preferences[host_name_search])";
+}
+
+if (isset($preferences['metric_search']) && $preferences['metric_search'] != "") {
+    $query .= " AND s.service_id IN ($preferences[metric_search])";
 }
 
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
