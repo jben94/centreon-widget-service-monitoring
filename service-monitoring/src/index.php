@@ -152,6 +152,7 @@ if (isset($preferences['metric_search']) && $preferences['metric_search'] != "")
     $query .= " AND s.service_id IN ($preferences[metric_search])";
 }
 
+
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
     preg_match_all("/(\\d+)\\-(\\d+),?/", $preferences['service_description_search'], $matches);
     $svcListId = implode(',', $matches[2]);
