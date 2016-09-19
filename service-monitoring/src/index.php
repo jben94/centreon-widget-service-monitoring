@@ -169,11 +169,14 @@ if (isset($preferences['host_group_filter']) && $preferences['host_group_filter'
 }
 
 if (isset($preferences['service_group_filter']) && $preferences['service_group_filter']) {
-    $queryHost = "SELECT DISTINCT h.host_id FROM servicegroups sg INNER JOIN services_servicegroups
-    sgm ON sg.servicegroup_id = sgm.servicegroup_id INNER JOIN services s ON s.service_id = sgm.service_id
-    INNER JOIN  hosts h ON sgm.host_id = h.host_id AND h.host_id = s.host_id WHERE  sg.servicegroup_id =
-    ".$dbb->escape($preferences['service_group_filter']);
-
+    $queryHost = "SELECT DISTINCT h.host_id
+                  FROM servicegroups sg
+                  INNER JOIN services_servicegroups sgm ON sg.servicegroup_id = sgm.servicegroup_id
+                  INNER JOIN services s ON s.service_id = sgm.service_id
+                  INNER JOIN  hosts h ON sgm.host_id = h.host_id
+                  AND h.host_id = s.host_id
+                  WHERE sg.servicegroup_id IN
+    (". $preferences['service_group_filter'] .")";
 
     $resultHost = $dbb->query($queryHost);
     if (PEAR::isError($resultHost)) {
@@ -181,22 +184,20 @@ if (isset($preferences['service_group_filter']) && $preferences['service_group_f
     }
 
     while ($row = $resultHost->fetchRow()) {
-        $Host[] = $row['host_id'];
+        $host[] = $row['host_id'];
     }
 
-    if(count($Host) === 0){
+    if(count($host) !== 0){
         $query = CentreonUtils::conditionBuilder($query,
             " s.service_id IN (
             SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm,
             services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id
             AND sg.servicegroup_id = sgm.servicegroup_id
             AND sg.servicegroup_id = ".$dbb->escape($preferences['service_group_filter'])."
-            AND h.host_id IN (".  implode(",", $Host).")
+            AND h.host_id IN (".  implode(",", $host).")
       ) ");
     }
 }
-
-var_dump($preferences);
 
 $stateTab = array();
 if (isset($preferences['svc_ok']) && $preferences['svc_ok']) {
