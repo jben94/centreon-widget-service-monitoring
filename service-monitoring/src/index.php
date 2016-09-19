@@ -146,15 +146,57 @@ if (isset($preferences['host_name_search']) && $preferences['host_name_search'] 
     $query .= " AND h.host_id IN ($preferences[host_name_search])";
 }
 
+if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] != ""){
+    $query .= " AND hcr.hostcategories_hc_id IN ($preferences[host_categories_search])";
+}
+
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
     preg_match_all("/(\\d+)\\-(\\d+),?/", $preferences['service_description_search'], $matches);
     $svcListId = implode(',', $matches[2]);
     $query .= " AND s.service_id IN ($svcListId)";
 }
 
-if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] != ""){
-    $query .= " AND hcr.hostcategories_hc_id IN ($preferences[host_categories_search])";
+if (isset($preferences['poller_filter']) && $preferences['poller_filter'] != "") {
+    $query .= " AND i.instance_id IN (" .$preferences["poller_filter"].")";
 }
+
+if (isset($preferences['host_group_filter']) && $preferences['host_group_filter']) {
+    $query = CentreonUtils::conditionBuilder($query,
+        " s.host_id IN (
+      SELECT host_host_id
+      FROM ".$conf_centreon['db'].".hostgroup_relation
+      WHERE hostgroup_hg_id = ".$dbb->escape($preferences['host_group_filter']).")");
+}
+
+if (isset($preferences['service_group_filter']) && $preferences['service_group_filter']) {
+    $queryHost = "SELECT DISTINCT h.host_id FROM servicegroups sg INNER JOIN services_servicegroups
+    sgm ON sg.servicegroup_id = sgm.servicegroup_id INNER JOIN services s ON s.service_id = sgm.service_id
+    INNER JOIN  hosts h ON sgm.host_id = h.host_id AND h.host_id = s.host_id WHERE  sg.servicegroup_id =
+    ".$dbb->escape($preferences['service_group_filter']);
+
+
+    $resultHost = $dbb->query($queryHost);
+    if (PEAR::isError($resultHost)) {
+        print "DB Error : " . $resultHost->getDebugInfo() . "<br />";
+    }
+
+    while ($row = $resultHost->fetchRow()) {
+        $Host[] = $row['host_id'];
+    }
+
+    if(count($Host) === 0){
+        $query = CentreonUtils::conditionBuilder($query,
+            " s.service_id IN (
+            SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm,
+            services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id
+            AND sg.servicegroup_id = sgm.servicegroup_id
+            AND sg.servicegroup_id = ".$dbb->escape($preferences['service_group_filter'])."
+            AND h.host_id IN (".  implode(",", $Host).")
+      ) ");
+    }
+}
+
+var_dump($preferences);
 
 $stateTab = array();
 if (isset($preferences['svc_ok']) && $preferences['svc_ok']) {
@@ -197,10 +239,6 @@ if (isset($preferences['downtime_filter']) && $preferences['downtime_filter']) {
     }
 }
 
-if (isset($preferences['poller_filter']) && $preferences['poller_filter']) {
-
-            $query = CentreonUtils::conditionBuilder($query, " instance_id = ".$preferences['poller_filter']." ");
-    }
 
 if (isset($preferences['state_type_filter']) && $preferences['state_type_filter']) {
     if ($preferences['state_type_filter'] == "hardonly") {
@@ -210,39 +248,6 @@ if (isset($preferences['state_type_filter']) && $preferences['state_type_filter'
     }
 }
 
-if (isset($preferences['hostgroup']) && $preferences['hostgroup']) {
-    $query = CentreonUtils::conditionBuilder($query, 
-    " s.host_id IN (
-      SELECT host_host_id
-      FROM ".$conf_centreon['db'].".hostgroup_relation
-      WHERE hostgroup_hg_id = ".$dbb->escape($preferences['hostgroup']).")");
-}
-if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
-    $queryHost = "SELECT DISTINCT h.host_id FROM servicegroups sg INNER JOIN services_servicegroups
-    sgm ON sg.servicegroup_id = sgm.servicegroup_id INNER JOIN services s ON s.service_id = sgm.service_id
-    INNER JOIN  hosts h ON sgm.host_id = h.host_id AND h.host_id = s.host_id WHERE  sg.servicegroup_id =
-    ".$dbb->escape($preferences['servicegroup']);
-    
-    $resultHost = $dbb->query($queryHost);
-    if (PEAR::isError($resultHost)) {
-        print "DB Error : " . $resultHost->getDebugInfo() . "<br />";
-    }
-
-    while ($row = $resultHost->fetchRow()) {
-        $Host[] = $row['host_id'];
-    }
-
-    if(count($Host) === 0){
-        $query = CentreonUtils::conditionBuilder($query,
-            " s.service_id IN (
-            SELECT DISTINCT s.service_id FROM servicegroups sg, services_servicegroups sgm,
-            services s, hosts h WHERE h.host_id = s.host_id AND s.host_id = sgm.host_id AND s.service_id = sgm.service_id
-            AND sg.servicegroup_id = sgm.servicegroup_id
-            AND sg.servicegroup_id = ".$dbb->escape($preferences['servicegroup'])."
-            AND h.host_id IN (".  implode(",", $Host).")
-      ) ");
-    }
-}
 if (isset($preferences["display_severities"]) && $preferences["display_severities"] 
     && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
   $tab = explode(",", $preferences['criticality_filter']);
