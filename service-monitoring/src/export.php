@@ -72,7 +72,6 @@ $media = new CentreonMedia($db);
 
 $centreon = $_SESSION['centreon'];
 $widgetId = $_REQUEST['widgetId'];
-$page = $_REQUEST['page'];
 
 $dbb = new CentreonDB("centstorage");
 $widgetObj = new CentreonWidget($centreon, $db);
@@ -114,15 +113,17 @@ $stateLabels = array(0 => "Ok",
     2 => "Critical",
     3 => "Unknown",
     4 => "Pending");
+
 // Build Query
 $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		h.name as hostname,
+        s.latency,
+        s.execution_time,
 		h.state as h_state,
-		hc.hc_id,
-		hc.hc_name,
 		s.service_id,
 		s.description,
 		s.state as s_state,
+        h.state_type as state_type,
 		s.last_hard_state,
 		s.output,
 		s.scheduled_downtime_depth as s_scheduled_downtime_depth,
@@ -145,9 +146,11 @@ $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		s.action_url as s_action_url,
 		s.notes_url as s_notes_url,
 		cv2.value AS criticality_id,
-		cv.value AS criticality_level
+		cv.value AS criticality_level,
+        h.icon_image
 ";
-$query .= " FROM hosts h, services s, hostcategories hc ";
+$query .= " FROM hosts h ";
+$query .= " LEFT JOIN instances i ON h.instance_id = i.instance_id, services s ";
 $query .= " LEFT JOIN customvariables cv ON (s.service_id = cv.service_id AND s.host_id = cv.host_id AND cv.name = 'CRITICALITY_LEVEL') ";
 $query .= " LEFT JOIN customvariables cv2 ON (s.service_id = cv2.service_id AND s.host_id = cv2.host_id AND cv2.name = 'CRITICALITY_ID') ";
 
@@ -157,8 +160,13 @@ if (!$centreon->user->admin) {
 $query .= " WHERE s.host_id = h.host_id ";
 $query .= " AND h.name NOT LIKE '_Module_%' ";
 $query .= " AND s.enabled = 1 ";
+
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
     $query .= " AND h.host_id IN ($preferences[host_name_search])";
+}
+
+if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] !=""){
+    $query .= " AND hc.hc_id IN ($preferences[host_categories_search])";
 }
 
 if (isset($preferences['service_description_search']) && $preferences['service_description_search'] != "") {
@@ -167,8 +175,8 @@ if (isset($preferences['service_description_search']) && $preferences['service_d
     $query .= " AND s.service_id IN ($svcListId)";
 }
 
-if (isset($preferences['host_categories_search']) && $preferences['host_categories_search'] !=""){
-    $query .= " AND hc.hc_id IN ($preferences[host_categories_search])";
+if (isset($preferences['poller_filter']) && $preferences['poller_filter'] != "") {
+    $query .= " AND i.instance_id IN (" .$preferences["poller_filter"].")";
 }
 
 $stateTab = array();
@@ -209,7 +217,7 @@ if (isset($preferences['downtime_filter']) && $preferences['downtime_filter']) {
 }
 
 if (isset($preferences['poller_filter']) && $preferences['poller_filter']) {
-        $query = CentreonUtils::conditionBuilder($query, " instance_id = " . $preferences['poller_filter'] . " ");
+        $query = CentreonUtils::conditionBuilder($query, " i.instance_id = " . $preferences['poller_filter'] . " ");
     }
 
 if (isset($preferences['state_type_filter']) && $preferences['state_type_filter']) {
@@ -240,7 +248,7 @@ if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
 }
 if (isset($preferences["display_severities"]) && $preferences["display_severities"]
     && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
-    $tab = split(",", $preferences['criticality_filter']);
+    $tab = explode(",", $preferences['criticality_filter']);
     $labels = "";
     foreach ($tab as $p) {
         if ($labels != '') {
@@ -277,6 +285,7 @@ $nbRows = $dbb->numberRows();
 $data = array();
 $outputLength = $preferences['output_length'] ? $preferences['output_length'] : 50;
 $commentLength = $preferences['comment_length'] ? $preferences['comment_length'] : 50;
+
 
 $hostObj = new CentreonHost($db);
 $svcObj = new CentreonService($db);

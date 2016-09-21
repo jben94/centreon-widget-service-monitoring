@@ -130,6 +130,7 @@ $query .= " FROM hosts h ";
 $query .= " LEFT JOIN instances i ON h.instance_id = i.instance_id, services s ";
 $query .= " LEFT JOIN customvariables cv ON (s.service_id = cv.service_id AND s.host_id = cv.host_id AND cv.name = 'CRITICALITY_LEVEL') ";
 $query .= " LEFT JOIN customvariables cv2 ON (s.service_id = cv2.service_id AND s.host_id = cv2.host_id AND cv2.name = 'CRITICALITY_ID') ";
+
 if (isset($preferences['host_categories_search'])) {
     $query .= " LEFT JOIN centreon.hostcategories_relation hcr ON (s.host_id = hcr.host_host_id) ";
 }
