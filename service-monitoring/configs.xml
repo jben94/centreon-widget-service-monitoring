@@ -4,18 +4,18 @@
   <email>contact@centreon.com</email>
   <website>http://www.centreon.com</website>
   <description>Widget for displaying service monitoring information</description>
-  <version>1.4.9</version>
+  <version>1.4.8</version>
   <keywords>centreon, widget, service, monitoring</keywords>
   <screenshot></screenshot>
   <thumbnail>./widgets/service-monitoring/resources/centreon-logo.png</thumbnail>
   <url>./widgets/service-monitoring/index.php</url>
   <autoRefresh>10</autoRefresh>
   <preferences>
+    <preference label="Pollers Name Filter" name="poller_filter" type="pollerMulti"/>
     <preference label="Host Filter" name="host_name_search" defaultValue="" type="hostMulti"/>
     <preference label="Host Categories Filter" name="host_categories_search" defaultValue="" type="hostCategoriesMulti"/>
-    <preference label="Service Filter" name="service_description_search" defaultValue="" type="serviceMulti"/>
-    <preference label="Pollers Name Filter" name="poller_filter" type="pollerMulti"/>
     <preference label="Host Group Filter" name="host_group_filter" defaultValue="" type="hostGroupMulti"/>
+    <preference label="Service Filter" name="service_description_search" defaultValue="" type="serviceMulti"/>
     <preference label="Service Group Filter" name="service_group_filter" defaultValue="" type="serviceGroupMulti"/>
     <preference label="Display Ok" name="svc_ok" defaultValue="1" type="boolean"/>
     <preference label="hide services with DOWN host" name="hide_down_host" defaultValue="0" type="boolean"/>
