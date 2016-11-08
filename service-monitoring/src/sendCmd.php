@@ -42,6 +42,8 @@ require_once $centreon_path . 'www/class/centreonHost.class.php';
 require_once $centreon_path . 'www/class/centreonService.class.php';
 require_once $centreon_path . 'www/class/centreonExternalCommand.class.php';
 require_once $centreon_path . 'www/class/centreonUtils.class.php';
+require_once $centreon_path . 'www/widgets/host-monitoring/class/centreonWidgetServiceMonitoringExternalCommand.class.php';
+
 
 session_start();
 
@@ -60,6 +62,10 @@ try {
     $selections = explode(',', $_POST['selection']);
     $oreon = $centreon;
     $externalCmd = new CentreonExternalCommand($centreon);
+    $widgetExternalCommand = new centreonWidgetServiceMonitoringExternalCommand($db);
+
+    $hosts = explode(',', $_POST['hosts']);
+//    $services = explode(',', $_POST['services']);
 
     $hostObj = new CentreonHost($db);
     $svcObj = new CentreonService($db);
@@ -107,71 +113,108 @@ try {
         if (!isset($_POST['start']) || !isset($_POST['end'])) {
             throw new Exception ('Missing downtime start/end');
         }
-        if (isset($_POST['hourstart']) && $_POST['hourstart']) {
-            $tmpHstart = str_pad($_POST['hourstart'], 2, "0", STR_PAD_LEFT);
+
+        if (isset($_POST['start_time']) && $_POST['start_time']) {
+            $timeStart = str_replace(' ', '', $_POST['start_time']);
         } else {
-            $tmpHstart = "00";
+            $timeStart = '00:00';
         }
-        if (isset($_POST['minutestart']) && $_POST['minutestart']) {
-            $tmpMstart = str_pad($_POST['minutestart'], 2, "0", STR_PAD_LEFT);
+
+        if (isset($_POST['end_time']) && $_POST['end_time']) {
+            $timeEnd = str_replace(' ', '', $_POST['end_time']);
         } else {
-            $tmpMstart = "00";
+            $timeEnd = '00:00';
         }
-        if (isset($_POST['hourend']) && $_POST['hourend']) {
-            $tmpHend = str_pad($_POST['hourend'], 2, "0", STR_PAD_LEFT);
-        } else {
-            $tmpHend = "00";
-        }
-        if (isset($_POST['minuteend']) && $_POST['minuteend']) {
-            $tmpMend = str_pad($_POST['minuteend'], 2, "0", STR_PAD_LEFT);
-        } else {
-            $tmpMend = "00";
-        }
+
         $dateStart = $_POST['start'];
-        $start = $dateStart . " " . $tmpHstart . ":" . $tmpMstart;
-        $start = CentreonUtils::getDateTimeTimestamp($start);
         $dateEnd = $_POST['end'];
-        $end = $dateEnd . " " . $tmpHend . ":" . $tmpMend;
-        $end = CentreonUtils::getDateTimeTimestamp($end);
-        $command = "SCHEDULE_HOST_DOWNTIME;%s;$start;$end;$fixed;0;$duration;$author;$comment";
-        $commandSvc = "SCHEDULE_SVC_DOWNTIME;%s;%s;$start;$end;$fixed;0;$duration;$author;$comment";
+
+        foreach ($hosts as $hostId)  {
+            $hostname = $hostObj->getHostName($hostId);
+            $pollerId = $hostObj->getHostPollerId($hostId);
+//            $svcDesc = $svcObj->getServiceDesc($svcId);
+
+            /*
+             TODO Add checkbox to use host timezone
+
+
+              $timestampStart = $widgetExternalCommand->getTimestamp($hostId, $dateStart, $timeStart);
+
+              $timestampEnd = $widgetExternalCommand->getTimestamp($hostId, $dateEnd, $timeEnd);
+
+            */
+
+            $timestampStart = CentreonUtils::getDateTimeTimestamp($dateStart . " " . $timeStart);
+            $timestampEnd = CentreonUtils::getDateTimeTimestamp($dateEnd . " " . $timeEnd);
+
+            $commands[$pollerId][] = "SCHEDULE_HOST_DOWNTIME;$hostname;$timestampStart;$timestampEnd;$fixed;0;$duration;$author;$comment";
+
+            if (isset($_POST['processServices'])) {
+                $commands[$pollerId][] = "SCHEDULE_HOST_SVC_DOWNTIME;$hostname;$timestampStart;$timestampEnd;$fixed;0;$duration;$author;$comment";
+            }
+        }
+
     } else {
         throw new Exception('Unknown command');
     }
-    if ($command != "") {
-        foreach ($selections as $selection) {
-            $tmp = explode(";", $selection);
-            if (count($tmp) != 2) {
-                throw new Exception('Incorrect id format');
-            }
-            $hostId = $tmp[0];
-            $svcId = $tmp[1];
-            $hostname = $hostObj->getHostName($hostId);
-            $svcDesc = $svcObj->getServiceDesc($svcId);
-            $pollerId = $hostObj->getHostPollerId($hostId);
-            if ($cmd == 70 || $cmd == 74) {
-                $externalCmd->set_process_command(sprintf($commandSvc, $hostname, $svcDesc), $pollerId);
-                if (isset($forceCmdSvc)) {
-                    $externalCmd->set_process_command(sprintf($forceCmdSvc, $hostname, $svcDesc), $pollerId);
-                }
-            } else {
-                $externalCmd->set_process_command(sprintf($command, $hostname), $pollerId);
-            }
-            if (isset($forceCmd)) {
-                $externalCmd->set_process_command(sprintf($forceCmd, $hostname), $pollerId);
-            }
-            if (isset($_POST['processServices'])) {
-                $services = $svcObj->getServiceId(null, $hostname);
-                foreach($services as $svcDesc => $svcId) {
-                    $externalCmd->set_process_command(sprintf($commandSvc, $hostname, $svcDesc), $pollerId);
-                    if (isset($forceCmdSvc)) {
-                        $externalCmd->set_process_command(sprintf($forceCmdSvc, $hostname, $svcDesc), $pollerId);
-                    }
-                }
-            }
+
+    foreach ($commands as $pollerId => $commandLines) {
+        foreach ($commandLines as $commandLine) {
+            $externalCmd->setProcessCommand($commandLine, $pollerId);
         }
-        $externalCmd->write();
     }
+    $externalCmd->write();
+
 } catch (Exception $e) {
     echo $e->getMessage();
 }
+
+
+//        $dateStart = $_POST['start'];
+//        $start = $dateStart . " " . $tmpHstart . ":" . $tmpMstart;
+//        $start = CentreonUtils::getDateTimeTimestamp($start);
+//        $dateEnd = $_POST['end'];
+//        $end = $dateEnd . " " . $tmpHend . ":" . $tmpMend;
+//        $end = CentreonUtils::getDateTimeTimestamp($end);
+//        $command = "SCHEDULE_HOST_DOWNTIME;%s;$start;$end;$fixed;0;$duration;$author;$comment";
+//        $commandSvc = "SCHEDULE_SVC_DOWNTIME;%s;%s;$start;$end;$fixed;0;$duration;$author;$comment";
+//    } else {
+//        throw new Exception('Unknown command');
+//    }
+//    if ($command != "") {
+//        foreach ($selections as $selection) {
+//            $tmp = explode(";", $selection);
+//            if (count($tmp) != 2) {
+//                throw new Exception('Incorrect id format');
+//            }
+//            $hostId = $tmp[0];
+//            $svcId = $tmp[1];
+//            $hostname = $hostObj->getHostName($hostId);
+//            $svcDesc = $svcObj->getServiceDesc($svcId);
+//            $pollerId = $hostObj->getHostPollerId($hostId);
+//            if ($cmd == 70 || $cmd == 74) {
+//                $externalCmd->setProcessCommand(sprintf($commandSvc, $hostname, $svcDesc), $pollerId);
+//                if (isset($forceCmdSvc)) {
+//                    $externalCmd->setProcessCommand(sprintf($forceCmdSvc, $hostname, $svcDesc), $pollerId);
+//                }
+//            } else {
+//                $externalCmd->setProcessCommand(sprintf($command, $hostname), $pollerId);
+//            }
+//            if (isset($forceCmd)) {
+//                $externalCmd->setProcessCommand(sprintf($forceCmd, $hostname), $pollerId);
+//            }
+//            if (isset($_POST['processServices'])) {
+//                $services = $svcObj->getServiceId(null, $hostname);
+//                foreach($services as $svcDesc => $svcId) {
+//                    $externalCmd->setProcessCommand(sprintf($commandSvc, $hostname, $svcDesc), $pollerId);
+//                    if (isset($forceCmdSvc)) {
+//                        $externalCmd->setProcessCommand(sprintf($forceCmdSvc, $hostname, $svcDesc), $pollerId);
+//                    }
+//                }
+//            }
+//        }
+//        $externalCmd->write();
+//    }
+//} catch (Exception $e) {
+//    echo $e->getMessage();
+//}

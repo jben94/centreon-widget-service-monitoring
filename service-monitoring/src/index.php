@@ -126,7 +126,7 @@ $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		cv.value AS criticality_level,
         h.icon_image
 ";
-$query .= " FROM hosts h ";
+$query .= " FROM hosts h";
 $query .= " LEFT JOIN instances i ON h.instance_id = i.instance_id, services s ";
 $query .= " LEFT JOIN customvariables cv ON (s.service_id = cv.service_id AND s.host_id = cv.host_id AND cv.name = 'CRITICALITY_LEVEL') ";
 $query .= " LEFT JOIN customvariables cv2 ON (s.service_id = cv2.service_id AND s.host_id = cv2.host_id AND cv2.name = 'CRITICALITY_ID') ";
@@ -142,6 +142,12 @@ $query .= " WHERE s.host_id = h.host_id ";
 $query .= " AND h.name NOT LIKE '_Module_%' ";
 $query .= " AND s.enabled = 1 ";
 $query .= " AND h.enabled = 1 ";
+
+if (isset($preferences["display_severities"]) && $preferences["display_severities"]
+    && isset($preferences['criticities_filter']) && $preferences['criticities_filter'] != "") {
+
+  $query .= " AND cv2.`value` IN ($preferences[criticities_filter]) ";
+}
 
 if (isset($preferences['host_name_search']) && $preferences['host_name_search'] != "") {
     $query .= " AND h.host_id IN ($preferences[host_name_search])";
@@ -250,27 +256,6 @@ if (isset($preferences['state_type_filter']) && $preferences['state_type_filter'
     }
 }
 
-if (isset($preferences["display_severities"]) && $preferences["display_severities"] 
-    && isset($preferences['criticality_filter']) && $preferences['criticality_filter'] != "") {
-  $tab = explode(",", $preferences['criticality_filter']);
-  $labels = "";
-  foreach ($tab as $p) {
-    if ($labels != '') {
-      $labels .= ',';
-    }
-    $labels .= "'".trim($p)."'";
-  }
-  $query2 = "SELECT sc_id FROM service_categories WHERE sc_name IN (".$labels.")";
-  $RES = $db->query($query2);
-  $idC = "";
-  while ($d1 = $RES->fetchRow()) {
-    if ($idC != '') {
-      $idC .= ",";
-    }
-    $idC .= $d1['sc_id'];
-  }
-  $query .= " AND cv2.`value` IN ($idC) ";
-}
 if (!$centreon->user->admin) {
     $pearDB = $db;
     $aclObj = new CentreonACL($centreon->user->user_id, $centreon->user->admin);

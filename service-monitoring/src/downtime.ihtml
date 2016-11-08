@@ -15,7 +15,7 @@
 	            </td>
 	        </tr>
 			<tr>
-				<td>{$endLabel}<span style='color: red;'>*</span></td>
+				<td>{$endLabel}<span style='color: red;'> *</span></td>
 				<td>
 					<input type='text' id='downtimeend' name='end' value='{$defaultEnd}' size='8' />
 					<input type='text' name='hourend' value='{$defaultHourEnd}' size='2' maxlength='2' />:
@@ -39,7 +39,7 @@
 				<td><input type='text' value='{$author}' disabled /><input name='author' type='hidden' value='{$author}'/></td>
 			</tr>
 			<tr>
-				<td>{$commentLabel}<span style='color: red;'>*</span></td>
+				<td>{$commentLabel}<span style='color: red;'> *</span></td>
 				<td><textarea id='comment' name='comment' cols='30' rows='3'>{$defaultMessage}</textarea></td>
 			</tr>
 			{if $cmd == 75}
@@ -50,10 +50,10 @@
 	        {/if}
 		</table>
 		<div id="validForm">
-			<input type='hidden' name='selection' value='{$selection}' />
-			<input type='hidden' name='cmd' value='{$cmd}' />
-			<input type='hidden' name='cmdType' value='downtime' />
-			<input type='button' id='submit' value='{$submitLabel}'/>
+			<input class="btc bt_info" type='hidden' name='selection' value='{$selection}' />
+			<input class="btc bt_info" type='hidden' name='cmd' value='{$cmd}' />
+			<input class="btc bt_info" type='hidden' name='cmdType' value='downtime' />
+			<input class="btc bt_success" type='button' id='submit' value='{$submitLabel}'/>
 		</div>
 	</div>
 </form>

@@ -76,6 +76,7 @@ $bMoreViews = 0;
 if ($preferences['more_views']) {
     $bMoreViews = $preferences['more_views'];
 }
+
 $template->assign('more_views', $bMoreViews);
 
 $template->display('index.ihtml');
