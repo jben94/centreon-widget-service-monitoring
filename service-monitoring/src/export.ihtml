@@ -19,7 +19,7 @@
 {if $preferences.display_hard_state_duration}{$elem.last_hard_state_change};{/if}
 {if $preferences.display_last_check}{$elem.last_check};{/if}
 {if $preferences.display_tries}{$elem.check_attempt};{/if}
-{if $preferences.display_output}{$elem.output};{/if}
+{if $preferences.display_output}"{$elem.output}";{/if}
 {if $preferences.display_last_comment}{$elem.comment}{/if}
 
 {/foreach}
