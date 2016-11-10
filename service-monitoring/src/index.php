@@ -145,7 +145,6 @@ $query .= " AND h.enabled = 1 ";
 
 if (isset($preferences["display_severities"]) && $preferences["display_severities"]
     && isset($preferences['criticities_filter']) && $preferences['criticities_filter'] != "") {
-
   $query .= " AND cv2.`value` IN ($preferences[criticities_filter]) ";
 }
 

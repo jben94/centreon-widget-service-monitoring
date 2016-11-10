@@ -91,7 +91,7 @@ try {
         $command = "ACKNOWLEDGE_HOST_PROBLEM;%s;$sticky;$notify;$persistent;$author;$comment";
         $commandSvc = "ACKNOWLEDGE_SVC_PROBLEM;%s;%s;$sticky;$notify;$persistent;$author;$comment";
         if (isset($_POST['forcecheck'])) {
-            $forceCmd = "SCHEDULE_FORCED_HOST_CHECK;%s;".time(); 
+            $forceCmd = "SCHEDULE_FORCED_HOST_CHECK;%s;".time();
             $forceCmdSvc = "SCHEDULE_FORCED_SVC_CHECK;%s;%s;".time();
         }
     } elseif ($type == 'downtime') {
