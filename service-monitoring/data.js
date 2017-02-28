@@ -43,10 +43,10 @@ function loadPage()
 {
     jQuery.ajax("./src/index.php?widgetId=" + widgetId + "&page=" + pageNumber, {
         success: function (htmlData) {
-            jQuery("#serviceMonitoringTable").empty().append(htmlData);
-            var hostMonitoringTable = jQuery("#serviceMonitoringTable").find("img, style, script, link").load(function () {
-                var h = document.getElementById("serviceMonitoringTable").scrollHeight + 0;
-                parent.iResize(window.name, h);
+            console.log('toto');
+            jQuery("#serviceMonitoringTable").empty().append(htmlData).append(function() {
+                    var h = document.getElementById("serviceMonitoringTable").scrollHeight + 0;
+                    parent.iResize(window.name, h);
             });
         }
     });
