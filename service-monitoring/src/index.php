@@ -213,11 +213,13 @@ if (isset($preferences['poller']) && $preferences['poller']) {
 }
 
 if (isset($preferences['hostgroup']) && $preferences['hostgroup']) {
+    if (is_array($preferences['hostgroup']))
+        $preferences['hostgroup'] = implode(', ', $preferences['hostgroup']);
     $query = CentreonUtils::conditionBuilder($query, 
     " s.host_id IN (
       SELECT host_host_id
       FROM ".$conf_centreon['db'].".hostgroup_relation
-      WHERE hostgroup_hg_id = ".$dbb->escape($preferences['hostgroup']).")");
+      WHERE hostgroup_hg_id IN (".$dbb->escape($preferences['hostgroup'])."))");
 }
 if (isset($preferences['servicegroup']) && $preferences['servicegroup']) {
     $queryHost = "SELECT DISTINCT h.host_id FROM servicegroups sg INNER JOIN services_servicegroups
