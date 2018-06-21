@@ -57,6 +57,7 @@ try {
     $centreon = $_SESSION['centreon'];
     $oreon = $centreon;
     $cmd = $_REQUEST['cmd'];
+    $wId = $_REQUEST['wid'];
     $selections = explode(",", $_REQUEST['selection']);
     $externalCmd = new CentreonExternalCommand($centreon);
 
@@ -249,14 +250,16 @@ try {
                 }
                 $hostId = $tmp[0];
                 $svcId = $tmp[1];
-                $hostname = $hostObj->getHostName($hostId);
-                $svcDesc = $svcObj->getServiceDesc($svcId);
-                if ($isSvcCommand === true) {
-                    $cmdParam = $hostname . ";" . $svcDesc;
-                } else {
-                    $cmdParam = $hostname;
+                if ($hostId != 0 && $svcId != 0) {
+                    $hostname = $hostObj->getHostName($hostId);
+                    $svcDesc = $svcObj->getServiceDesc($svcId);
+                    if ($isSvcCommand === true) {
+                        $cmdParam = $hostname . ";" . $svcDesc;
+                    } else {
+                        $cmdParam = $hostname;
+                    }
+                    $externalCmd->$externalCommandMethod(sprintf($command, $cmdParam), $hostObj->getHostPollerId($hostId));
                 }
-                $externalCmd->$externalCommandMethod(sprintf($command, $cmdParam), $hostObj->getHostPollerId($hostId));
             }
             $externalCmd->write();
         }
@@ -270,14 +273,18 @@ try {
 <script type='text/javascript'>
 var result = <?php echo $result;?>;
 var successMsg = "<?php echo $successMsg;?>";
+var wId = "<?php echo $wId;?>";
+var widgetName = 'widget_' + viewId + '_' + wId;
 
 jQuery(function() {
     if (result) {
         jQuery("#result").html(successMsg);
         setTimeout('closeBox()', 2000);
+        setTimeout('reloadFrame(widgetName)', 2500);
     }
     jQuery("#submit").click(function() {
         sendCmd();
+        setTimeout('reloadFrame(widgetName)', 2500);
     });
     jQuery("#submit").button();
     toggleDurationField();
@@ -291,6 +298,10 @@ jQuery(function() {
 function closeBox()
 {
     parent.jQuery('#widgetPopin').centreonPopin('close');
+}
+
+function reloadFrame(widgetName) {
+    document.getElementsByName(widgetName)[0].contentWindow.location.reload(true);
 }
 
 function sendCmd()

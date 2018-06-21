@@ -66,6 +66,7 @@ $criticality = new CentreonCriticality($db);
 $media = new CentreonMedia($db);
 
 $centreon = $_SESSION['centreon'];
+$centreonWebPath = trim($centreon->optGen['oreon_web_path'], "/");
 $widgetId = $_REQUEST['widgetId'];
 $page = $_REQUEST['page'];
 
@@ -92,6 +93,7 @@ $stateLabels = array(0 => "Ok",
 // Build Query
 $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		h.name as hostname,
+		h.alias as hostalias,
 		s.latency,
 		s.execution_time,
 		h.state as h_state,
@@ -176,7 +178,9 @@ if (isset($preferences['svc_pending']) && $preferences['svc_pending']) {
 if (isset($preferences['hide_down_host']) && $preferences['hide_down_host']) {
     $query = CentreonUtils::conditionBuilder($query, " h.state != 1 ");
 }
-
+if (isset($preferences['hide_unreachable_host']) && $preferences['hide_unreachable_host']) {
+    $query = CentreonUtils::conditionBuilder($query, " h.state != 2 ");
+}
 
 
 if (count($stateTab)) {
@@ -188,6 +192,14 @@ if (isset($preferences['acknowledgement_filter']) && $preferences['acknowledgeme
         $query = CentreonUtils::conditionBuilder($query, " s.acknowledged = 1");
     } elseif ($preferences['acknowledgement_filter'] == "nack") {
         $query = CentreonUtils::conditionBuilder($query, " s.acknowledged = 0 AND h.acknowledged = 0 AND h.scheduled_downtime_depth = 0 ");
+    }
+}
+
+if (isset($preferences['notification_filter']) && $preferences['notification_filter']) {
+    if ($preferences['notification_filter'] == "enabled") {
+        $query = CentreonUtils::conditionBuilder($query, " s.notify = 1");
+    } elseif ($preferences['notification_filter'] == "disabled") {
+        $query = CentreonUtils::conditionBuilder($query, " s.notify = 0");
     }
 }
 
@@ -339,8 +351,18 @@ while ($row = $res->fetchRow()) {
         } elseif ($key == "output") {
             $value = substr($value, 0, $outputLength);
         } elseif (($key == "h_action_url" || $key == "h_notes_url") && $value) {
+            if (preg_match('#^\./(.+)#', $value, $matches)) {
+                $value = '/' . $centreonWebPath . '/' . $matches[1];
+            } elseif (!preg_match("#(^http[s]?)|(^//)#", $value)) {
+                $value = '//' . $value;
+            }
             $value = CentreonUtils::escapeSecure($hostObj->replaceMacroInString($row['hostname'], $value));
         } elseif (($key == "s_action_url" || $key == "s_notes_url") && $value) {
+            if (preg_match('#^\./(.+)#', $value, $matches)) {
+                $value = '/' . $centreonWebPath . '/' . $matches[1];
+            } elseif (!preg_match("#(^http[s]?)|(^//)#", $value)) {
+                $value = '//' . $value;
+            }
             $value = CentreonUtils::escapeSecure($hostObj->replaceMacroInString($row['hostname'], $value));
             $value = CentreonUtils::escapeSecure($svcObj->replaceMacroInString($row['service_id'], $value));
         } elseif ($key == "criticality_id" && $value != '') {

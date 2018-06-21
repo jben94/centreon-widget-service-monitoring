@@ -87,6 +87,7 @@ $stateLabels = array(0 => "Ok",
 // Build Query
 $query = "SELECT SQL_CALC_FOUND_ROWS h.host_id,
 		h.name as hostname,
+		h.alias as hostalias,
     s.latency,
     s.execution_time,
 		h.state as h_state,
@@ -167,6 +168,9 @@ if (isset($preferences['svc_pending']) && $preferences['svc_pending']) {
 if (isset($preferences['hide_down_host']) && $preferences['hide_down_host']) {
     $query = CentreonUtils::conditionBuilder($query, " h.state != 1 ");
 }
+if (isset($preferences['hide_unreachable_host']) && $preferences['hide_unreachable_host']) {
+    $query = CentreonUtils::conditionBuilder($query, " h.state != 2 ");
+}
 if (count($stateTab)) {
     $query = CentreonUtils::conditionBuilder($query, " s.state IN (" . implode(',', $stateTab) . ")");
 }
@@ -175,6 +179,13 @@ if (isset($preferences['acknowledgement_filter']) && $preferences['acknowledgeme
         $query = CentreonUtils::conditionBuilder($query, " s.acknowledged = 1");
     } elseif ($preferences['acknowledgement_filter'] == "nack") {
         $query = CentreonUtils::conditionBuilder($query, " s.acknowledged = 0 AND h.acknowledged = 0 AND h.scheduled_downtime_depth = 0 ");
+    }
+}
+if (isset($preferences['notification_filter']) && $preferences['notification_filter']) {
+    if ($preferences['notification_filter'] == "enabled") {
+        $query = CentreonUtils::conditionBuilder($query, " s.notify = 1");
+    } elseif ($preferences['notification_filter'] == "disabled") {
+        $query = CentreonUtils::conditionBuilder($query, " s.notify = 0");
     }
 }
 if (isset($preferences['downtime_filter']) && $preferences['downtime_filter']) {

@@ -75,7 +75,7 @@ if ($canDoAction || $centreon->user->access->checkAction("service_schedule_force
 if ($canDoAction || $centreon->user->access->checkAction("service_acknowledgement")) {
     $actions .= "<option value='70'>"._("Service: Acknowledge")."</option>";
 }
-if ($canDoAction || $centreon->user->access->checkAction("service_acknowledgement")) {
+if ($canDoAction || $centreon->user->access->checkAction("service_disacknowledgement")) {
     $actions .= "<option value='71'>"._("Service: Remove Acknowledgement")."</option>";
 }
 if ($canDoAction || $centreon->user->access->checkAction("service_schedule_downtime")) {
@@ -83,20 +83,16 @@ if ($canDoAction || $centreon->user->access->checkAction("service_schedule_downt
 }
 if ($canDoAction || $centreon->user->access->checkAction("service_notifications")) {
     $actions .= "<option value='80'>"._("Service: Enable Notification")."</option>";
-}
-if ($canDoAction || $centreon->user->access->checkAction("service_notifications")) {
     $actions .= "<option value='81'>"._("Service: Disable Notification")."</option>";
 }
 if ($canDoAction || $centreon->user->access->checkAction("service_checks")) {
     $actions .= "<option value='90'>"._("Service: Enable Check")."</option>";
-}
-if ($canDoAction || $centreon->user->access->checkAction("service_checks")) {
     $actions .= "<option value='91'>"._("Service: Disable Check")."</option>";
 }
 if ($canDoAction || $centreon->user->access->checkAction("host_acknowledgement")) {
     $actions .= "<option value='72'>"._("Host: Acknowledge")."</option>";
 }
-if ($canDoAction || $centreon->user->access->checkAction("host_acknowledgement")) {
+if ($canDoAction || $centreon->user->access->checkAction("host_disacknowledgement")) {
     $actions .= "<option value='73'>"._("Host: Remove Acknowledgement")."</option>";
 }
 if ($canDoAction || $centreon->user->access->checkAction("host_schedule_downtime")) {
@@ -104,14 +100,10 @@ if ($canDoAction || $centreon->user->access->checkAction("host_schedule_downtime
 }
 if ($canDoAction || $centreon->user->access->checkAction("host_notifications")) {
     $actions .= "<option value='82'>"._("Host: Enable Host Notification")."</option>";
-}
-if ($canDoAction || $centreon->user->access->checkAction("host_notifications")) {
     $actions .= "<option value='83'>"._("Host: Disable Host Notification")."</option>";
 }
 if ($canDoAction || $centreon->user->access->checkAction("host_checks")) {
     $actions .= "<option value='92'>"._("Host: Enable Host Check")."</option>";
-}
-if ($canDoAction || $centreon->user->access->checkAction("host_checks")) {
     $actions .= "<option value='93'>"._("Host: Disable Host Check")."</option>";
 }
 
@@ -124,11 +116,12 @@ $template->display('toolbar.ihtml');
 <script type='text/javascript'>
 var tab = new Array();
 var actions = "<?php echo $actions;?>";
+var wid = "<?php echo $widgetId;?>";
 
 
 jQuery( function() {
     jQuery(".toolbar").change( function() {
-        
+
         if (jQuery(this).val() != 0) {
             var checkValues = jQuery("input:checked")
                 .map( function() {
@@ -138,7 +131,8 @@ jQuery( function() {
                 .get().join(",");
 
             if (checkValues != '') {
-                var url = "./widgets/service-monitoring/src/action.php?selection="+checkValues+"&cmd="+jQuery(this).val();
+                var url = "./widgets/service-monitoring/src/action.php?selection="+checkValues+
+                    "&cmd=" + jQuery(this).val() + "&wid=" + wid;
                 parent.jQuery('#widgetPopin').parent().remove();
                 var popin = parent.jQuery('<div id="widgetPopin">');
 
